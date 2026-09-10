@@ -189,6 +189,10 @@ $VLESS
 хостер не менял, изменён только способ входа по SSH.
 EOF
 chmod 600 "$OUT"/*
+# Копия для пользователя: root по SSH будет закрыт, файлы должны быть доступны proxyadmin
+USER_OUT="/home/$NEW_USER/proxy-server"
+install -d -m 700 -o "$NEW_USER" -g "$NEW_USER" "$USER_OUT"
+cp "$OUT"/* "$USER_OUT/"; chown "$NEW_USER:$NEW_USER" "$USER_OUT"/*; chmod 600 "$USER_OUT"/*
 
 say "ГОТОВО. Скопируйте и сохраните этот блок целиком"
 echo "--------------------------------------------------------------------------"
@@ -199,7 +203,7 @@ cat "$OUT/id_ed25519"
 echo "--------------------------------------------------------------------------"
 echo "QR-код ссылки для телефона:"
 qrencode -t ANSIUTF8 "$VLESS" || true
-echo "Файлы также лежат в $OUT (скачать: scp -r root@$SERVER_IP:$OUT ./)"
+echo "Файлы лежат в $USER_OUT (скачать по SFTP под $NEW_USER или: scp -r $NEW_USER@$SERVER_IP:proxy-server ./)"
 
 # ---------- 7. отключение root и паролей — только после подтверждения ----------
 if ! is_done 07-harden; then
